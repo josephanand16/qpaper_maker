@@ -1,23 +1,20 @@
 from fpdf import FPDF
+from pdf_datacontainer import PdfDataContainer
 
-class QPaper(FPDF):
+class QPaper(FPDF,PdfDataContainer):
 
     def __init__(self, orientation = "portrait", unit = "mm", format = "A4") -> None:
 
         super().__init__(orientation, unit, format)
-        self._global_font = 'Arial'
-        self._date = '01.01.1970'
-        self._marks = 50
-        self._clss = 10
-        self._cell_width = 7
+        PdfDataContainer.__init__(self)
         self.set_left_margin(4)
         self.total_width = 200
 
     def header(self):
 
         self.header_font()
-        self.cell(0, self.cw, "Maxwell Public School", ln=1, align='C')
-        self.cell(0, self.cw, "Chemistry", ln=1, align='C')
+        self.cell(0, self.cw, self.institute, ln=1, align='C')
+        self.cell(0, self.cw, self.subject, ln=1, align='C')
         self.sub_header_font()
         self.cell(self.total_width // 3, self.cw, "Date : "+self.date, ln=0, align='L')
         self.header_font()
@@ -50,49 +47,4 @@ class QPaper(FPDF):
         self.set_font(self.global_font, 'I', 8)
         self.cell(0, 10, '%s' % self.page_no(), 0, 0, 'C')
 
-# Getter and setters for 
 
-# Global font
-    @property
-    def global_font(self):
-        return self._global_font
-
-    @global_font.setter
-    def global_font(self, font):
-        self._global_font = font
-    
-# Exam date
-    @property
-    def date(self):
-        return self._date
-    
-    @date.setter
-    def date(self, dt):
-        self._date = dt
-
-# Question paper marks
-    @property
-    def marks(self):
-        return self._marks
-    
-    @marks.setter
-    def marks(self, mrks):
-        self._marks = mrks
-
-# Class Name
-    @property
-    def clss(self):
-        return self._clss
-    
-    @clss.setter
-    def clss(self, cl):
-        self._clss = cl
-
-# Cell Width
-    @property
-    def cw(self):
-        return self._cell_width
-    
-    @cw.setter
-    def cw(self, cw):
-        self._cell_width = cw
