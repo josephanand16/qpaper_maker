@@ -1,107 +1,123 @@
+# DB GUI to manage to database (edit, store and delete)
+
 import tkinter as tk
 import logging
 import json
 
-from data_container import DBDataContainer
+from db_datacontainer import DBDataContainer
 
 logging.getLogger().setLevel(logging.INFO)
 
-class JsonDBEditor(tk.Tk):
+class JsonDBEditor(tk.Tk,DBDataContainer):
     
     def __init__(self):
         super().__init__()
+        DBDataContainer.__init__(self)
         self.title("JSON Question Database Editor")
-        self.dt = DBDataContainer()
+
         self.entry_widgets = []
         self.load_json_data()
-        self.create_labels_and_entries(self.data)
+        self.makeform()
+        self.q_id = 0
+
+        clear_button = tk.Button(self, text="Clear", command=self.delete_data)
+        clear_button.pack(side=tk.RIGHT, padx=10, pady=10)
 
         update_button = tk.Button(self, text="Update", command=self.update_data)
         update_button.pack(side='left')
 
-        delete_button = tk.Button(self, text="Delete", command=self.delete_data)
+        delete_button = tk.Button(self, text="Delete", command=(lambda : self.delete_data(clear_only=False)))
         delete_button.pack(side='left')
 
-        show_button = tk.Button(self, text="Show", command=self.show_data)
-        show_button.pack(side='right')
+        show_button = tk.Button(self, text="Show", command=(lambda : self.show_data(0)))
+        show_button.pack(side='left')
+
+        next_button = tk.Button(self, text="Next>", command=(lambda : self.show_data(1)))
+        next_button.pack(side='right')
+
+        prev_button = tk.Button(self, text="<Previous", command=(lambda : self.show_data(-1)))
+        prev_button.pack(side='right')
     
     def makeform(self):
 
-        for field in self.dt.fields.keys():
-            row = tk.Frame(self)
-            lab = tk.Label(row, width=15, text=field, anchor='w')
-            ent = tk.Entry(row)
-            row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-            lab.pack(side=tk.LEFT)
-            ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
+        # Question ID entry
+        lab = tk.Label(self, width=15, text="q_id", anchor='w')
+        ent = tk.Entry()
+        lab.pack(anchor='w')
+        ent.pack(anchor='w')
+        self.entry_widgets.append(("q_id", ent))
+
+        # Other question entries
+        for field in self.fields.keys():
+            lab = tk.Label(self, width=15, text=field, anchor='w')
+            if field != "question_text":
+                ent = tk.Entry(self, width=30)
+            else:
+                ent = tk.Text(self, height=10, width=60)
+            lab.pack(anchor='w')
+            ent.pack(anchor='w')
             self.entry_widgets.append((field, ent))
 
-    def create_labels_and_entries(self, data):
-
-        self.marks_label = tk.Label(self, text="Marks:")
-        self.marks_label.pack()
-
-        self.marks_entry = tk.Entry(self)
-        self.marks_entry.pack()
-
-        self.question_label = tk.Label(self, text="Question:")
-        self.question_label.pack()
-
-        self.question_entry = tk.Entry(self, width=50)
-        self.question_entry.pack()
-
-    def load_json_data(self):
-        with open(self.dt.db_name) as json_file:
-            self.data = json.load(json_file)
-
-    def dump_json_data(self):
-        with open(self.dt.db_name, "w") as json_file:
-            json.dump(self.data, json_file, indent=4)
-
-    def update_q_param(self):
-
-        self.data[getquestion]["marks"] = int(self.marks_entry.get())
-        self.data[getquestion]["marks"] = int(self.marks_entry.get())
-
     def update_data(self):
-
-        getquestion = self.question_entry.get()
-        if getquestion == '':
-            logging.error("Question field is empty")
-            return -1
-        if getquestion not in self.data.keys():
-            self.data[getquestion] = {}
-            logging.info("New question added")
-        self.data[getquestion]["marks"] = int(self.marks_entry.get())
-        self.dump_json_data()
-        return 0
-
-    def show_data(self):
-
-        if len(self.data.keys()) == 0:
-            logging.error("Database is empty")
-            return -1
-        getquestion = self.question_entry.get()
-        self.marks_entry.delete(0,'end')
-        if getquestion == '':
-            res = list(self.data.keys())[0]
-            self.question_entry.insert(0, res)
-            self.marks_entry.insert(0, self.data[res]["marks"])
-            logging.info("Showing the first available questions")
-        elif len(self.data.keys()) > 0:
-            self.marks_entry.insert(0, self.data[getquestion]["marks"])
-        return 0
-
-    def delete_data(self):
-
-        getquestion = self.question_entry.get()
-        if getquestion in self.data.keys():
-            del self.data[getquestion]
-            self.question_entry.delete(0,'end')
-            self.marks_entry.delete(0,'end')
+        
+        new_dict = {}
+        q_id = 0
+        for field,text in self.entry_widgets:
+            if field == "q_id" :
+                if text.get() != "":
+                    self.q_id = int(text.get())
+                    text.insert(0, self.q_id)
+                else:
+                    text.insert(0, len(self.data))
+                    q_id = -1
+            elif field == "marks" or field == "board":
+                new_dict[field] = int(text.get())
+            elif field == "question_text":
+                new_dict[field] = text.get("1.0", "end-1c")
+            else:
+                new_dict[field] = text.get()
+        if q_id == -1:
+            self.data.append(new_dict)
+            logging.info("New question {} added".format(len(self.data)))
         else:
-            logging.info("Question not present in database")
+            self.data[self.q_id] = new_dict
+            logging.info("Question {} update".format(self.q_id+1))
         self.dump_json_data()
+
+    def show_data(self, offset):
+
+        for field,text in self.entry_widgets:
+            if field == "q_id" :
+                if text.get() != "":
+                    self.q_id = int(text.get())
+                if (self.q_id + offset) >= 0 and (self.q_id + offset) < len(self.data):
+                    self.q_id = self.q_id + offset
+                text.delete(0,'end')
+                text.insert(0, self.q_id)
+            elif field == "question_text":
+                text.delete("1.0",tk.END)
+                text.insert(tk.END, self.data[self.q_id][field])
+            else:
+                text.delete(0,'end')
+                text.insert(0, self.data[self.q_id][field])
+
+    def delete_data(self,clear_only=True):
+
+        for field,text in self.entry_widgets:
+            if field == "q_id" :
+                if text.get() != "":
+                    self.q_id = int(text.get())
+                else:
+                    logging.error("Question id invalid")
+                    return -1
+                text.delete(0,'end')
+            elif field == "question_text":
+                text.delete("1.0",tk.END)
+            else:
+                text.delete(0,'end')
+        if not clear_only:
+            del self.data[self.q_id]
+            self.dump_json_data()
 
 if __name__ == "__main__":
     app = JsonDBEditor()

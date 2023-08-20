@@ -2,8 +2,8 @@ from fpdf_qpaper import QPaper
 
 pdf = QPaper(orientation = 'P', unit = 'mm', format='A4')
 pdf.date = '15.08.2023'
-pdf.marks = 100
-pdf.clss = 10
+pdf.marks = 20
+pdf.clss = 6
 pdf.add_page()
 
 q_paper_dict = {

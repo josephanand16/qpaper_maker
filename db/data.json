@@ -1,14 +1,26 @@
-{
-    "question1": {
-        "marks": 11
+[
+    {
+        "marks": 1,
+        "board": 2009,
+        "lesson": "lesson1",
+        "question_text": "What is the name of the lesson?\nThis is the next line"
     },
-    "question2": {
-        "marks": 144
+    {
+        "marks": 1,
+        "board": 2009,
+        "lesson": "lesson2",
+        "question_text": "What is the name of the lesson?\nThis is the next line"
     },
-    "question3": {
-        "marks": 10
+    {
+        "marks": 1,
+        "board": 2009,
+        "lesson": "lesson1",
+        "question_text": "What is the name of the lesson?\nThis is the next line"
     },
-    "question4": {
-        "marks": 11
+    {
+        "marks": 1,
+        "board": 2009,
+        "lesson": "lesson2",
+        "question_text": "What is the name of the lesson?\nThis is the next line"
     }
-}
+]
