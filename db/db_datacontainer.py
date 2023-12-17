@@ -9,7 +9,7 @@ class DBDataContainer:
             "lesson" : "",
             "question_text" : ""
         }
-        self._db_name = "data.json"
+        self._db_name = "data/data.json"
 
     def load_json_data(self):
         with open(self.db_name) as json_file:
