@@ -8,25 +8,18 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 global_font = 'Arial'
 cell_font_size = Pt(12)
 
-def add_text_nl(paragraph, text, bold=False, italic=False, pt=12):
+def add_text(paragraph, text, bold=False, italic=False, pt=12, nl=False):
     # Add a run to the paragraph
-    run = paragraph.add_run(text + "\n")
+    if nl:
+        run = paragraph.add_run(text + "\n")
+    else:
+        run = paragraph.add_run(text)
 
     # Add some formatting to the run
     run.bold = bold
     run.italic = italic
     run.font.name = global_font
     run.font.size = docx.shared.Pt(pt)
-
-def add_text(paragraph, text, bold=False, italic=False, pt=12):
-    # Add a run to the paragraph
-    run = paragraph.add_run(text)
-
-    # Add some formatting to the run
-    run.bold = bold
-    run.italic = italic
-    run.font.name = global_font
-    run.font.size = Pt(pt)
 
 # Function to set cell borders
 def __set_cell_border(cell, **kwargs):
@@ -126,10 +119,10 @@ p.paragraph_format.line_spacing = 1.0
 p.paragraph_format.space_after = 0
 
 # Add a run to the paragraph
-add_text_nl(p, "python-docx", bold=True, italic=True, pt=16)
+add_text(p, "python-docx", bold=True, italic=True, pt=16, nl= True)
 
 # Add more text to the same paragraph
-add_text_nl(p, "Tutorial", bold=True, pt=16)
+add_text(p, "Tutorial", bold=True, pt=16, nl= True)
 
 # Add another paragraph (left blank for an empty line)
 # doc.add_paragraph()
